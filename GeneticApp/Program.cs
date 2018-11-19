@@ -1,4 +1,5 @@
 ﻿using GeneticSharp.Domain;
+using GeneticSharp.Domain.Chromosomes;
 using GeneticSharp.Domain.Crossovers;
 using GeneticSharp.Domain.Mutations;
 using GeneticSharp.Domain.Populations;
@@ -20,11 +21,11 @@ namespace GeneticApp
             int edgesNumber = lines.Count();
             List<Edge> edges = new List<Edge>();
             List<int> vertices = new List<int>();
-            string[] stringSeparators = new string[] { "/t" };
+            string stringSeparator =  "\t";
             foreach(string l in lines)
             {
-                string[] values = l.Split(stringSeparators,StringSplitOptions.RemoveEmptyEntries);
-                int[] numericValues = Array.ConvertAll(values, int.Parse);
+                string[] values = l.Split(stringSeparator.ToCharArray(),StringSplitOptions.None);
+                int[] numericValues = values.Select(s=>int.Parse(s)).ToArray();
 
                 if (!vertices.Contains(numericValues[0]))
                 {
@@ -52,6 +53,11 @@ namespace GeneticApp
             ga.Start();
 
             Console.WriteLine("Best solution found has {0} fitness.", ga.BestChromosome.Fitness);
+            foreach(Gene g in ga.BestChromosome.GetGenes())
+            {
+                Console.Write("{0},", g);
+            }
+            
         }
     }
 }
