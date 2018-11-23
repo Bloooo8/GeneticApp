@@ -1,21 +1,35 @@
-﻿namespace GeneticApp
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace GeneticApp
 {
     public class Edge
     {
+        public int VertexA { get; set; }
+        public int VertexB { get; set; }
+        public int Cost { get; set; }
+        public int Index { get; set; }
+        public bool Visited { get; set; }
 
-        public Edge(int vertexA,int vertexB,int cost)
+        public Edge(int vertexA,int vertexB,int cost,int index)
         {
             Cost = cost;
-            Vertices =new int[2] { vertexA, vertexB };
+            VertexA = vertexA;
+            VertexB = vertexB;
+            Visited = false;
+            Index = index;
+        }
+       
+        public List<Edge> GetNeighbours(List<Edge> edges)
+        {
+            List<Edge> neighbours = edges.Where(e => e.IsNextTo(this)).ToList();
+            return neighbours;
 
         }
-        public int Cost { get; set; }
-        public int[] Vertices { get; set; }
-
-        public bool IsNeighbour(Edge edge)
+        public bool IsNextTo(Edge edge)
         {
             bool result = false;
-            if(this.Vertices[0]==edge.Vertices[1] || this.Vertices[1] == edge.Vertices[0])
+            if(this.VertexA==edge.VertexB)
             {
                 result = true;
             }

@@ -64,6 +64,7 @@
     <Compile Include="Chromosome.cs" />
     <Compile Include="Edge.cs" />
     <Compile Include="FitnessFunction.cs" />
+    <Compile Include="FloydWarshall.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

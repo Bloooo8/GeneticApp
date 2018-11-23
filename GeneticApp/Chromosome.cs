@@ -11,13 +11,25 @@ namespace GeneticApp
     public class Chromosome : ChromosomeBase
     {
         private readonly int edgesNumber;
+        private readonly List<Edge> edges;
 
-        public Chromosome(int edgesQuantity) : base(edgesQuantity)
+
+        public Chromosome(int edgesQuantity,List<Edge> _edges) : base(edgesQuantity)
         {
+            List<Edge> neighbours;  //krawędzie wychodzące od danej krawędzi
+            int selectedEdgeIndex;  //losowy indeks jednego z sąsiadów
             edgesNumber = edgesQuantity;
-            var edgesIndexes = RandomizationProvider.Current.GetUniqueInts(edgesQuantity, 0, edgesQuantity);
-
-            for (int i = 0; i < edgesQuantity; i++)
+            edges = _edges;
+            int[] edgesIndexes = new int[edgesNumber]; //RandomizationProvider.Current.GetUniqueInts(edgesQuantity, 0, edgesQuantity);
+            Random randomizationProvider = new Random();
+            edgesIndexes[0] = randomizationProvider.Next(edgesNumber);
+            for (int i = 1; i < edgesNumber; i++)
+            {
+                neighbours = edges[i - 1].GetNeighbours(edges);
+                selectedEdgeIndex = randomizationProvider.Next(neighbours.Count);
+                edgesIndexes[i] = edges.IndexOf(neighbours[selectedEdgeIndex]);
+            }
+            for (int i = 0; i < edgesNumber; i++)
             {
                 ReplaceGene(i, new Gene(edgesIndexes[i]));
             }
@@ -32,7 +44,7 @@ namespace GeneticApp
 
         public override IChromosome CreateNew()
         {
-            return new Chromosome(edgesNumber);
+            return new Chromosome(edgesNumber,edges);
         }
 
         public override IChromosome Clone()
