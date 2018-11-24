@@ -22,10 +22,10 @@ namespace GeneticApp
             edges = _edges;
             int[] edgesIndexes = new int[edgesNumber]; //RandomizationProvider.Current.GetUniqueInts(edgesQuantity, 0, edgesQuantity);
             Random randomizationProvider = new Random();
-            edgesIndexes[0] = randomizationProvider.Next(edgesNumber);
+            edgesIndexes[0] = randomizationProvider.Next(edgesNumber/4);
             for (int i = 1; i < edgesNumber; i++)
             {
-                neighbours = edges[i - 1].GetNeighbours(edges);
+                neighbours = edges[edgesIndexes[i - 1]].GetNeighbours(edges);
                 selectedEdgeIndex = randomizationProvider.Next(neighbours.Count);
                 edgesIndexes[i] = edges.IndexOf(neighbours[selectedEdgeIndex]);
             }

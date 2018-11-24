@@ -68,7 +68,7 @@ namespace GeneticApp
             return fitness;
 
         }
-        public  bool AllEdgesVisited(List<Edge> edges)
+        public static  bool AllEdgesVisited(List<Edge> edges)
         {
             foreach (var e in edges)
             {

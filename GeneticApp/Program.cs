@@ -49,57 +49,16 @@ namespace GeneticApp
 
             }
             int verticesNumber = vertices.Count;
-            #region FillWeightArray
-            int[,] FillWeightArray(List<Edge> listOfEdges, int verticesCount)
-            {
-                int[,] result = new int[verticesCount, verticesCount];
-                int weight = 0;
-                Edge edge;
-                int infinity = 999999;
-                for (int i = 0; i < verticesCount; i++)
-                {
-                    for (int j = 0; j < verticesCount; j++)
-                    {
-                        if (i == j)
-                        {
-                            result[j, i] = 0;
-                        }
-                        else if (i < j)
-                        {
-                            result[j, i] = infinity;
-                        }
-                        else
-                        {
-                            edge = listOfEdges.Find(e => e.VertexA == i && e.VertexB == j);
-                            weight =edge!=null ?edge.Cost:infinity ;
-                            if (weight != 0)
-                            {
-                                result[j, i] = weight;
-                                result[i, j] = weight;
-                            }
-                            else
-                            {
-                                result[j, i] = infinity;
-                            }
-
-                        }
-                    }
-                }
-                return result;
-            }
-            #endregion
-            int[,] weightArray = FillWeightArray(edges,verticesNumber);
-            List<int>[,] shortestPaths= FloydWarshall.CalculatePaths(weightArray);
-           
-            var selection = new RouletteWheelSelection();
+                   
+            var selection = new EliteSelection();
             var crossover = new ThreeParentCrossover();
-            var mutation = new ReverseSequenceMutation();
+            var mutation = new TworsMutation();
             var fitness = new FitnessFunction(edges);
-            var chromosome = new Chromosome(edgesNumber,edges);
+            var chromosome = new Chromosome(4*edgesNumber,edges);
             var population = new Population(200, 400, chromosome);
 
             var ga = new GeneticAlgorithm(population, fitness, selection, crossover, mutation);
-            ga.Termination = new GenerationNumberTermination(100);
+            ga.Termination = new GenerationNumberTermination(400);
 
             Stopwatch timer = new Stopwatch();
             timer.Start();
@@ -111,6 +70,7 @@ namespace GeneticApp
             int totalCost = 0;
             int currentEdgeIndex = Convert.ToInt32(bestChromosome.GetGene(0).Value, CultureInfo.InvariantCulture);
             Edge currentEdge = edges[currentEdgeIndex];
+            int startVertex = currentEdge.VertexA;
             totalCost += currentEdge.Cost;
             string verticesSequence = currentEdge.VertexA.ToString()+"-"+currentEdge.VertexB.ToString();
 
@@ -119,10 +79,15 @@ namespace GeneticApp
             {
                 currentEdgeIndex = Convert.ToInt32(bestChromosome.GetGene(i).Value, CultureInfo.InvariantCulture);
                 currentEdge = edges[currentEdgeIndex];
+                currentEdge.Visited = true;
+                edges.Find(e => e.VertexA == currentEdge.VertexB && e.VertexB == currentEdge.VertexA).Visited = true;
                 totalCost += currentEdge.Cost;
                 verticesSequence = verticesSequence + "-" + currentEdge.VertexB.ToString();
+                if (FitnessFunction.AllEdgesVisited(edges) && currentEdge.VertexB == startVertex)
+                {
+                    break;
+                }
             }
-            fitness.Evaluate(ga.BestChromosome);
             TimeSpan executionTime = timer.Elapsed;
             Console.WriteLine("Ścieżka: {0}", verticesSequence);
             Console.WriteLine("Koszt najlepszego rozwiązania: {0}", totalCost);
