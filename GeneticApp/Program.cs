@@ -83,9 +83,21 @@ namespace GeneticApp
                 edges.Find(e => e.VertexA == currentEdge.VertexB && e.VertexB == currentEdge.VertexA).Visited = true;
                 totalCost += currentEdge.Cost;
                 verticesSequence = verticesSequence + "-" + currentEdge.VertexB.ToString();
-                if (FitnessFunction.AllEdgesVisited(edges) && currentEdge.VertexB == startVertex)
+                if (FitnessFunction.AllEdgesVisited(edges)) 
                 {
-                    break;
+                    if (currentEdge.VertexB == startVertex)
+                    {
+                        break;
+                    }
+                        
+                    Edge possibleEdge = edges.Find(e => e.VertexA == currentEdge.VertexB && e.VertexB == startVertex);
+                    if (possibleEdge != null)
+                    {
+                        totalCost += possibleEdge.Cost;
+                        verticesSequence = verticesSequence + "-" + possibleEdge.VertexB.ToString();
+                        break;
+                    }
+                   
                 }
             }
             TimeSpan executionTime = timer.Elapsed;

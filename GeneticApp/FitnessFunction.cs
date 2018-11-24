@@ -31,23 +31,29 @@ namespace GeneticApp
                 int edgeIndex = Convert.ToInt32(genes[i].Value, CultureInfo.InvariantCulture);
                 Edge edge = Edges[edgeIndex];
                 Edge reverseEdge = Edges.Find(e => e.VertexA==edge.VertexB && e.VertexB==edge.VertexA); // znalezienie odwrotej krawędzi
-                Edges[edgeIndex].Visited = true; // krawędź została odwiedzona
+                edge.Visited = true; // krawędź została odwiedzona
                 reverseEdge.Visited = true; // odwrotność krawędzi została odwiedzona
 
-                if (i != 0 && Edges[edgeIndex].VertexA != Edges[Convert.ToInt32(genes[i - 1].Value, CultureInfo.InvariantCulture)].VertexB)
+                if (i != 0 &&edge.VertexA != Edges[Convert.ToInt32(genes[i - 1].Value, CultureInfo.InvariantCulture)].VertexB)
                 {
-                    distanceSum += Edges[edgeIndex].Cost * 1000; //jeśli ścieżka nie jest poprawna koszt jest znacząco zwiększany
+                    distanceSum += edge.Cost * 1000; //jeśli ścieżka nie jest poprawna koszt jest znacząco zwiększany
                     lastEdgeIndex = edgeIndex;
                 }
                 else
                 {
-                    distanceSum += Edges[edgeIndex].Cost;
+                    distanceSum += edge.Cost;
                     lastEdgeIndex = edgeIndex;
                 }
                 if (AllEdgesVisited(Edges)) // sprawdzenie czy ścieżka jest zamknięta i czy wszystkie krawędzie zostały odwiedzone
                 {
-                    if (Edges[edgeIndex].VertexB == Edges[Convert.ToInt32(genes[0].Value, CultureInfo.InvariantCulture)].VertexA)
+                    if (edge.VertexB == startingPoint)
                     {
+                        break;
+                    }
+                    Edge possibleEdge = Edges.Find(e => e.VertexA == edge.VertexB && e.VertexB == startingPoint);
+                    if (possibleEdge != null)
+                    {
+                        distanceSum += possibleEdge.Cost;
                         break;
                     }
 
