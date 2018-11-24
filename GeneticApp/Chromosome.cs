@@ -10,28 +10,24 @@ namespace GeneticApp
 {
     public class Chromosome : ChromosomeBase
     {
-        private readonly int edgesNumber;
-        private readonly List<Edge> edges;
 
-
-        public Chromosome(int edgesQuantity,List<Edge> _edges) : base(edgesQuantity)
+        private int verticesCount;
+        Random randomizationProvider;
+        public Chromosome(int verticesNumber) : base(verticesNumber)
         {
-            List<Edge> neighbours;  //krawędzie wychodzące od danej krawędzi
-            int selectedEdgeIndex;  //losowy indeks jednego z sąsiadów
-            edgesNumber = edgesQuantity;
-            edges = _edges;
-            int[] edgesIndexes = new int[edgesNumber]; //RandomizationProvider.Current.GetUniqueInts(edgesQuantity, 0, edgesQuantity);
-            Random randomizationProvider = new Random();
-            edgesIndexes[0] = randomizationProvider.Next(edgesNumber);
-            for (int i = 1; i < edgesNumber; i++)
+            verticesCount = verticesNumber;
+            int selectedVertexIndex;  //losowy indeks jednego z sąsiadów
+            int[] verticesIndexes = new int[verticesNumber]; 
+            randomizationProvider = new Random();
+            verticesIndexes[0] = randomizationProvider.Next(verticesNumber);
+            for (int i = 1; i < verticesNumber; i++)
             {
-                neighbours = edges[i - 1].GetNeighbours(edges);
-                selectedEdgeIndex = randomizationProvider.Next(neighbours.Count);
-                edgesIndexes[i] = edges.IndexOf(neighbours[selectedEdgeIndex]);
+                selectedVertexIndex = randomizationProvider.Next(verticesNumber);
+                verticesIndexes[i] = selectedVertexIndex;
             }
-            for (int i = 0; i < edgesNumber; i++)
+            for (int i = 0; i < verticesNumber; i++)
             {
-                ReplaceGene(i, new Gene(edgesIndexes[i]));
+                ReplaceGene(i, new Gene(verticesIndexes[i]));
             }
         }
 
@@ -39,12 +35,13 @@ namespace GeneticApp
 
         public override Gene GenerateGene(int geneIndex)
         {
-            return new Gene(RandomizationProvider.Current.GetInt(0, edgesNumber));
+            // return new Gene(RandomizationProvider.Current.GetInt(0, verticesCount));
+            return new Gene(randomizationProvider.Next(verticesCount));
         }
 
         public override IChromosome CreateNew()
         {
-            return new Chromosome(edgesNumber,edges);
+            return new Chromosome(verticesCount);
         }
 
         public override IChromosome Clone()

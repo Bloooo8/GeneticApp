@@ -18,17 +18,19 @@ namespace GeneticApp
 {
     class Program
     {
-
+        public static List<int>[,] shortestPaths;
+        public static List<Edge> edges;
         static void Main(string[] args)
         {
             Console.WriteLine("Podaj nazwę plkiu z danymi(bez rozszerzenia)");
             string fileName = Console.ReadLine();
             string[] lines = System.IO.File.ReadAllLines(Directory.GetCurrentDirectory()+"\\"+fileName+".txt");
             int edgesNumber = lines.Count();
-            List<Edge> edges = new List<Edge>();
+            edges = new List<Edge>();
             List<int> vertices = new List<int>();
             int edgeIndex = 0;
             string stringSeparator =  "\t";
+            #region ReadVerticesAndEdges
             foreach(string l in lines)
             {
                 string[] values = l.Split(stringSeparator.ToCharArray(),StringSplitOptions.None);
@@ -44,10 +46,11 @@ namespace GeneticApp
                 }
 
                 edges.Add(new Edge(numericValues[0], numericValues[1], numericValues[2], edgeIndex));//krawędź może być przechodzona w obu kierunkach
-                edges.Add(new Edge(numericValues[1], numericValues[0], numericValues[2], edgeIndex));//dlatego dodawana jest także w odwróconej wersji
+               // edges.Add(new Edge(numericValues[1], numericValues[0], numericValues[2], edgeIndex));//dlatego dodawana jest także w odwróconej wersji
                 edgeIndex++;//krawędź i jej odwrócona wersja mają ten sam indeks(dla łatwiejszego odnajdowania)
 
             }
+            #endregion
             int verticesNumber = vertices.Count;
             #region FillWeightArray
             int[,] FillWeightArray(List<Edge> listOfEdges, int verticesCount)
@@ -70,7 +73,7 @@ namespace GeneticApp
                         }
                         else
                         {
-                            edge = listOfEdges.Find(e => e.VertexA == i && e.VertexB == j);
+                            edge = listOfEdges.Find(e => e.VertexA == j && e.VertexB == i);
                             weight =edge!=null ?edge.Cost:infinity ;
                             if (weight != 0)
                             {
@@ -89,17 +92,17 @@ namespace GeneticApp
             }
             #endregion
             int[,] weightArray = FillWeightArray(edges,verticesNumber);
-            List<int>[,] shortestPaths= FloydWarshall.CalculatePaths(weightArray);
+            shortestPaths= FloydWarshall.CalculatePaths(weightArray);
            
             var selection = new RouletteWheelSelection();
             var crossover = new ThreeParentCrossover();
             var mutation = new ReverseSequenceMutation();
-            var fitness = new FitnessFunction(edges);
-            var chromosome = new Chromosome(edgesNumber,edges);
+            var fitness = new FitnessFunction(weightArray);
+            var chromosome = new Chromosome(verticesNumber);
             var population = new Population(200, 400, chromosome);
 
             var ga = new GeneticAlgorithm(population, fitness, selection, crossover, mutation);
-            ga.Termination = new GenerationNumberTermination(100);
+            ga.Termination = new GenerationNumberTermination(500);
 
             Stopwatch timer = new Stopwatch();
             timer.Start();
@@ -109,23 +112,39 @@ namespace GeneticApp
 
             Chromosome bestChromosome = ga.BestChromosome as Chromosome;
             int totalCost = 0;
-            int currentEdgeIndex = Convert.ToInt32(bestChromosome.GetGene(0).Value, CultureInfo.InvariantCulture);
+            /*int currentEdgeIndex = Convert.ToInt32(bestChromosome.GetGene(0).Value, CultureInfo.InvariantCulture);
             Edge currentEdge = edges[currentEdgeIndex];
             totalCost += currentEdge.Cost;
             string verticesSequence = currentEdge.VertexA.ToString()+"-"+currentEdge.VertexB.ToString();
-
+            */
+            int currentVertex = 0;
+            int previousVertex = 0;
+            string verticesSequence = Convert.ToInt32(bestChromosome.GetGene(0).Value, CultureInfo.InvariantCulture).ToString();
             Console.WriteLine("Funkcja dopasowania najlepszego rozwiązania wynosi: {0}", bestChromosome.Fitness);
-            for(int i = 1; i < bestChromosome.Length; i++)
+            /* for(int i = 1; i < bestChromosome.Length; i++)
+             {
+                 currentEdgeIndex = Convert.ToInt32(bestChromosome.GetGene(i).Value, CultureInfo.InvariantCulture);
+                 currentEdge = edges[currentEdgeIndex];
+                 totalCost += currentEdge.Cost;
+                 verticesSequence = verticesSequence + "-" + currentEdge.VertexB.ToString();
+             }*/
+            currentVertex = Convert.ToInt32(bestChromosome.GetGene(0).Value, CultureInfo.InvariantCulture);
+            for (int i = 1; i < bestChromosome.Length; i++)
             {
-                currentEdgeIndex = Convert.ToInt32(bestChromosome.GetGene(i).Value, CultureInfo.InvariantCulture);
-                currentEdge = edges[currentEdgeIndex];
-                totalCost += currentEdge.Cost;
-                verticesSequence = verticesSequence + "-" + currentEdge.VertexB.ToString();
+                previousVertex = currentVertex;
+                currentVertex = Convert.ToInt32(bestChromosome.GetGene(i).Value, CultureInfo.InvariantCulture);
+
+                foreach(int j in shortestPaths[previousVertex, currentVertex])
+                {
+                    verticesSequence = verticesSequence + "-" + j.ToString();
+                }
+                verticesSequence = verticesSequence + "-" + currentVertex.ToString();
             }
+
             fitness.Evaluate(ga.BestChromosome);
             TimeSpan executionTime = timer.Elapsed;
             Console.WriteLine("Ścieżka: {0}", verticesSequence);
-            Console.WriteLine("Koszt najlepszego rozwiązania: {0}", totalCost);
+            Console.WriteLine("Koszt najlepszego rozwiązania: {0}", 1.0/bestChromosome.Fitness);
             Console.WriteLine("Czas wykonania: {0}", executionTime);
             Console.ReadKey();
             
