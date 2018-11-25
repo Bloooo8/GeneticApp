@@ -11,7 +11,7 @@ namespace GeneticApp
         public int Index { get; set; }
         public bool Visited { get; set; }
 
-        public Edge(int vertexA,int vertexB,int cost,int index)
+        public Edge(int vertexA, int vertexB, int cost, int index)
         {
             Cost = cost;
             VertexA = vertexA;
@@ -19,21 +19,15 @@ namespace GeneticApp
             Visited = false;
             Index = index;
         }
-       
+
         public List<Edge> GetNeighbours(List<Edge> edges)
         {
-            List<Edge> neighbours = edges.Where(e => e.IsNextTo(this)).ToList();
-            return neighbours;
-
+            return edges.Where(e => IsNextTo(e)).ToList();
         }
+
         public bool IsNextTo(Edge edge)
         {
-            bool result = false;
-            if(this.VertexA==edge.VertexB)
-            {
-                result = true;
-            }
-            return result;
+            return VertexA == edge.VertexB;
         }
     }
 }

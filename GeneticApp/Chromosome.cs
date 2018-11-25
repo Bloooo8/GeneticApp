@@ -2,9 +2,6 @@
 using GeneticSharp.Domain.Randomizations;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GeneticApp
 {
@@ -13,22 +10,21 @@ namespace GeneticApp
         private readonly int edgesNumber;
         private readonly List<Edge> edges;
 
-
-        public Chromosome(int edgesQuantity,List<Edge> _edges) : base(edgesQuantity)
+        public Chromosome(int edgesQuantity, List<Edge> _edges) : base(edgesQuantity)
         {
-            List<Edge> neighbours;  //krawędzie wychodzące od danej krawędzi
-            int selectedEdgeIndex;  //losowy indeks jednego z sąsiadów
             edgesNumber = edgesQuantity;
             edges = _edges;
             int[] edgesIndexes = new int[edgesNumber]; //RandomizationProvider.Current.GetUniqueInts(edgesQuantity, 0, edgesQuantity);
             Random randomizationProvider = new Random();
-            edgesIndexes[0] = randomizationProvider.Next(edgesNumber/4);
+            edgesIndexes[0] = randomizationProvider.Next(edgesNumber / 4);
+
             for (int i = 1; i < edgesNumber; i++)
             {
-                neighbours = edges[edgesIndexes[i - 1]].GetNeighbours(edges);
-                selectedEdgeIndex = randomizationProvider.Next(neighbours.Count);
+                List<Edge> neighbours = edges[edgesIndexes[i - 1]].GetNeighbours(edges);
+                int selectedEdgeIndex = randomizationProvider.Next(neighbours.Count);
                 edgesIndexes[i] = edges.IndexOf(neighbours[selectedEdgeIndex]);
             }
+
             for (int i = 0; i < edgesNumber; i++)
             {
                 ReplaceGene(i, new Gene(edgesIndexes[i]));
@@ -44,12 +40,12 @@ namespace GeneticApp
 
         public override IChromosome CreateNew()
         {
-            return new Chromosome(edgesNumber,edges);
+            return new Chromosome(edgesNumber, edges);
         }
 
         public override IChromosome Clone()
         {
-            var clone = base.Clone() as Chromosome;
+            Chromosome clone = base.Clone() as Chromosome;
             clone.Distance = Distance;
 
             return clone;
